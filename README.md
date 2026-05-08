@@ -1,61 +1,86 @@
-# Value-Based RL — Banana Navigator (DQN)
+# Value-Based RL — Banana Navigator (Double DQN + Dueling)
 
 Final project for Udacity's *Deep Reinforcement Learning Nanodegree*
-(nd893) — Navigation. A from-scratch DQN agent that solves the Unity
-ML-Agents Banana environment (collect yellow bananas, +1; avoid blue
-bananas, −1; +13 average over 100 consecutive episodes is the
-solve criterion).
+(nd893) — Project 1: Navigation.
 
-## Files
+A from-scratch DQN agent that solves Unity ML-Agents' **Banana**
+environment: collect yellow bananas (+1 reward) and avoid blue ones
+(−1 reward) in a finite-horizon episode. The environment is considered
+solved when the rolling 100-episode score crosses **+13**.
+
+## Project files
 
 ```
-model.py    QNetwork + DuelingQNetwork
-agent.py    DQNAgent + ReplayBuffer (Double DQN by default, with optional dueling head)
-train.py    CLI training loop
+Navigation.ipynb   end-to-end solution notebook (run this)
+Report.md          algorithm, hyper-parameters, and ideas for future work
+model.py           QNetwork + DuelingQNetwork
+agent.py           DQNAgent + ReplayBuffer (Double DQN, optional Dueling)
+train.py           headless equivalent of the notebook (CLI)
+README.md          you are here
+.gitignore
 ```
 
-## Architecture
+The training run produces:
 
-* **Q-network**: 37 → 128 → 64 → 4 (ReLU activations).
-* **Dueling head**: separates value V(s) from advantage A(s, a) and
-  recombines them as `V + (A − mean(A))`.
-* **Double DQN target**: `argmax_a Q_local(s', a)` selects the best
-  next action, `Q_target(s', a*)` evaluates it — defuses the
-  optimistic bias of vanilla DQN.
+* `banana_qnet.pth` — solved Q-network weights
+* `banana_scores.npy` — per-episode score array
 
-## Hyper-parameters
+## Environment setup
 
-| Param | Value |
-|---|---|
-| Buffer | 100 000 |
-| Batch | 64 |
-| Gamma | 0.99 |
-| Tau (soft update) | 1e-3 |
-| LR (Adam) | 5e-4 |
-| Update every | 4 steps |
-| ε start / min / decay | 1.0 / 0.01 / 0.995 |
+```bash
+# 1. Python deps
+pip install torch numpy matplotlib unityagents
+
+# 2. Download the Banana environment binary from the project page:
+#    https://github.com/udacity/deep-reinforcement-learning/tree/master/p1_navigation
+#    (Linux 64-bit, Mac, Windows 64-bit, or headless versions are listed there.)
+#    Unzip into the project folder.
+```
 
 ## Running
 
+### Notebook (recommended for the report)
+
 ```bash
-# 1. Download the Unity Banana environment per the rubric
-#    https://github.com/udacity/deep-reinforcement-learning/tree/master/p1_navigation
-pip install torch numpy unityagents
-python3 train.py --env path/to/Banana_Linux/Banana.x86_64 --episodes 2000
+jupyter notebook Navigation.ipynb
+# Restart & Run All
 ```
 
-The trained network is saved as `banana_qnet.pth` once the rolling
-100-episode average crosses +13. Scores are saved to `banana_scores.npy`
-for plotting.
+The notebook plots the learning curve and runs one demo episode using
+the saved weights at the end.
 
-## Standing-out work
+### CLI (recommended for headless training)
 
-* `Double DQN + Dueling` are *both* on by default — both are flips
-  away (`double_dqn=False`, `dueling=False`) to ablate.
-* Critic gradients clipped to 1.0 — required to keep the early
-  episodes stable on the dueling head.
-* The agent only learns every 4 environment steps, which is the
-  paper's recommended ratio for DQN on continuous-frame envs.
+```bash
+python3 train.py --env Banana_Linux/Banana.x86_64 --episodes 2000
+```
+
+## State / Action / Reward
+
+| Dimension | Spec |
+|---|---|
+| State  | 37-dim vector (agent velocity + ray-cast features) |
+| Action | 4 discrete: forward / backward / left / right |
+| Reward | +1 yellow banana, −1 blue banana, 0 otherwise |
+| Solve  | rolling 100-episode mean ≥ +13 |
+
+## Algorithm overview
+
+* **Double DQN** for unbiased TD targets.
+* **Dueling head** (V + A) for sample-efficient value estimation.
+* **Replay buffer** of 100k transitions.
+* **Soft target update** (τ = 1e-3) every learning step.
+* **ε-greedy** exploration with a 0.995 per-episode decay.
+
+The full hyper-parameter table and architecture diagram are in
+[`Report.md`](Report.md).
+
+## Results
+
+The agent solves the environment in roughly **400–550 episodes**
+(seed-dependent). After training, the demo cell in the notebook
+reliably scores in the high-teens during a single 300-step
+evaluation episode.
 
 ## License
 
