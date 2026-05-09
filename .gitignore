@@ -3,3 +3,8 @@ __pycache__/
 .DS_Store
 *.pth
 *.npy
+
+# Allow the trained Banana checkpoint to be committed
+!banana_dqn.pth
+!banana_scores.npy
+!banana_training_curve.png

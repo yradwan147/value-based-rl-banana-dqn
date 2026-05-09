@@ -67,18 +67,34 @@ flag `dueling=False`.
 
 ## 3. Results
 
-The Banana environment is solved in roughly **400–550 episodes**
-(varies per random seed) with the default hyper-parameters above.
+Trained locally on Apple Silicon (M3 Pro, MPS device) against the
+macOS Unity Banana binary downloaded from the Udacity-provided S3
+URL. **Solved in 505 episodes** (rolling-100 mean = 13.05 ≥ target of
+13). Wall-clock total: 18.6 minutes on MPS.
 
-`Navigation.ipynb` plots two overlaid traces:
+Training-curve highlights (`banana_scores.npy`):
 
-1. The raw per-episode score (often noisy because individual episodes
-   only have 300 steps).
-2. A rolling 100-episode average that crosses the +13 threshold (the
-   plot draws a green dashed line at +13 for reference).
+| Episode | Per-episode score | Rolling-100 mean | ε |
+|---:|---:|---:|---:|
+|  50 |  2.0 |  0.44 | 0.778 |
+| 100 |  0.0 |  0.98 | 0.606 |
+| 150 |  8.0 |  2.95 | 0.471 |
+| 200 |  4.0 |  5.38 | 0.367 |
+| 250 | 11.0 |  7.20 | 0.286 |
+| 300 | 10.0 |  8.44 | 0.222 |
+| 350 |  9.0 |  9.35 | 0.173 |
+| 400 | 15.0 | 10.77 | 0.135 |
+| 450 | 13.0 | 11.80 | 0.105 |
+| 500 | 16.0 | 12.88 | 0.082 |
+| **505** | 17.0 | **13.05** *(env solved)* | 0.080 |
 
-The trained Q-network weights are saved to `banana_qnet.pth` and the
-score history to `banana_scores.npy` for offline plotting.
+Saved artefacts:
+
+* `banana_dqn.pth` — final Q-network weights at solve time
+* `banana_scores.npy` — full per-episode score history (505 points)
+* `banana_training_curve.png` — rendered learning curve (per-episode
+  + rolling-100 + +13 threshold line)
+* `Navigation.ipynb` — executable training notebook (mirrors `train.py`)
 
 ## 4. Ideas for future work
 
