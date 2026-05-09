@@ -22,7 +22,7 @@ README.md          you are here
 
 The training run produces:
 
-* `banana_qnet.pth` — solved Q-network weights
+* `banana_dqn.pth` — solved Q-network weights
 * `banana_scores.npy` — per-episode score array
 
 ## Environment setup
